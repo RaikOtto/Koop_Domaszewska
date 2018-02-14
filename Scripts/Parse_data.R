@@ -10,6 +10,10 @@ cutoff_20 = as.integer(quantile(rowSums(raw_data), seq(0,1,by=.1))[3])
 raw_data_flt = raw_data[ rowSums(raw_data) >= cutoff_20,]
 dim(raw_data_flt)
 
+neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
+MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ]
+table(MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ])
+
 # create stichprobe
 
 meta_match = match(colnames(raw_data_flt), rownames(MDSraw$targets), nomatch = 0)
@@ -25,10 +29,16 @@ dim(meta_data)
 dim(raw_data_flt)
 dim(cor_mat)
 
-cbind(rownames(meta_data), colnames(cor_mat))
+cbind(rownames(meta_data), colnames(cor_mat)) # <- check if ordered correctly
 
-agg_exp = aggregate( raw_data_flt[,r], by = as.list(meta_data$study), FUN = rowSums)
-boxplot()
+colsums = colSums(raw_data_flt)
+
+
+neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
+#agg_exp = aggregate( raw_data_flt, by = list(meta_data$study), FUN = rowSums)
+
+#abs_plot = ggplot( data = , aes( Library, log2( Count ) ) )
+#abs_plot = abs_plot + geom_boxplot(aes(fill = Library))
 
 pdf( "~/Koop_Domaszewska/Results/QA/Heatmap_raw_300.pdf" , onefile=FALSE)
   pheatmap::pheatmap(
