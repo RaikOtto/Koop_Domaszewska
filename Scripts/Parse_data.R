@@ -1,18 +1,30 @@
 library("stringr")
 library("limma")
+library("GEOquery")
+
+gds <- getGEO("GDS507")
+gse <- getGEO("GSE39941")
+head(Meta(gds))
 
 load("~/Koop_Domaszewska/MDSraw.RDa")
 
 # init
 
 raw_data = MDSraw$E
+
+### correct for negative values
+
+neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
+neg_studies = MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ]
+table( neg_studies )
+meta_match = MDSraw$ which( MDSraw$targets$study %in% c( "Anderson", "bloom") )
+
+###
+
 cutoff_20 = as.integer(quantile(rowSums(raw_data), seq(0,1,by=.1))[3])
 raw_data_flt = raw_data[ rowSums(raw_data) >= cutoff_20,]
 dim(raw_data_flt)
-
-neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
-MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ]
-table(MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ])
+min(as.double(apply(raw_data, MARGIN = 2, FUN = min)))
 
 # create stichprobe
 
@@ -32,10 +44,14 @@ dim(cor_mat)
 cbind(rownames(meta_data), colnames(cor_mat)) # <- check if ordered correctly
 
 colsums = colSums(raw_data_flt)
-
+pdf( "~/Koop_Domaszewska/Results/QA/Hist_ColSums_raw_300.pdf" , onefile=FALSE)
+  hist(colsums)
+dev.off()
 
 neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
-#agg_exp = aggregate( raw_data_flt, by = list(meta_data$study), FUN = rowSums)
+agg_exp = aggregate( raw_data_flt, by = list(meta_data$study), FUN = rowSums)
+gather_matrix <- reshape2:::melt.matrix(as.matrix(raw_data_flt))
+gather_matrix[1:5,]
 
 #abs_plot = ggplot( data = , aes( Library, log2( Count ) ) )
 #abs_plot = abs_plot + geom_boxplot(aes(fill = Library))
