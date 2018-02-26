@@ -1,10 +1,5 @@
 library("stringr")
 library("limma")
-library("GEOquery")
-
-gds <- getGEO("GDS507")
-gse <- getGEO("GSE39941")
-head(Meta(gds))
 
 load("~/Koop_Domaszewska/MDSraw.RDa")
 
