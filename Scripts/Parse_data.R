@@ -1,10 +1,18 @@
 library("stringr")
-library("limma")
+library("beadarray")
 
-load("~/Koop_Domaszewska/MDSraw.RDa")
+# load hard
+
+i_files = list.files( "~/Koop_Domaszewska/Data/GSE37250_RAW/", pattern = ".txt", full.names = T)
+data = readIllumina(
+  dir = "~/Koop_Domaszewska/Data/GSE37250_RAW/",
+  #useImages = F,
+  illuminaAnnotation = "Humanv4"
+)
 
 # init
 
+load("~/Koop_Domaszewska/MDSraw.RDa")
 raw_data = MDSraw$E
 
 ### correct for negative values
@@ -48,62 +56,7 @@ agg_exp = aggregate( raw_data_flt, by = list(meta_data$study), FUN = rowSums)
 gather_matrix <- reshape2:::melt.matrix(as.matrix(raw_data_flt))
 gather_matrix[1:5,]
 
-#abs_plot = ggplot( data = , aes( Library, log2( Count ) ) )
-#abs_plot = abs_plot + geom_boxplot(aes(fill = Library))
 
-pdf( "~/Koop_Domaszewska/Results/QA/Heatmap_raw_300.pdf" , onefile=FALSE)
-  pheatmap::pheatmap(
-    cor_mat,
-    annotation_col = meta_data[c("study")],
-    show_rownames = F,
-    show_colnames = F#,
-    #annotation_colors = aka3,
-    #color = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")))(100)
-  )
-dev.off()
 
-pcr = prcomp(t(cor_mat))
-pdf( "~/Koop_Domaszewska/Results/QA/PCA_raw_300.pdf" , onefile=FALSE)
-  ggbiplot::ggbiplot(
-    pcr,
-    obs.scale = 1,
-    var.scale = 1, 
-    labels.size = 4,
-    alpha = 1,
-    groups = meta_data$study,
-    ellipse = TRUE, 
-    circle = TRUE,
-    var.axes = F
-  )
-dev.off()
 
-sort(table(MDSraw$targets$study), decreasing = T)
-cumsum(sort(table(MDSraw$targets$study), decreasing = F)) / sum(sort(table(MDSraw$targets$study), decreasing = F)) * 100
-# losing 47% of samples
 
-passing_studies = c("Anderson","kaforou")
-meta_data_filt = meta_data[meta_data$study %in% passing_studies,]
-raw_filt = raw_data[ , colnames( raw_data) %in% rownames(meta_data_filt) ]
-dim(raw_filt)
-
-cor_mat = cor(raw_filt)
-pheatmap::pheatmap(
-  cor_mat,
-  annotation_col = meta_data_filt[c("study")],
-  show_rownames = F,
-  show_colnames = F#,
-  #annotation_colors = aka3,
-  #color = colorRampPalette(rev(brewer.pal(n = 11, name = "RdYlBu")))(100)
-)
-
-ggbiplot::ggbiplot(
-  pcr,
-  obs.scale = 1,
-  var.scale = 1, 
-  labels.size = 4,
-  alpha = 1,
-  groups = MDSraw$targets$study[r],
-  ellipse = TRUE, 
-  circle = TRUE,
-  var.axes = F
-)
