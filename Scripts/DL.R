@@ -13,11 +13,6 @@ meta_info = read.table("~/Koop_Domaszewska/Misc/Meta_Information.tsv", sep ="\t"
 meta_match = match(colnames(data_matrix), rownames(meta_info), nomatch = 0)
 meta_data = meta_info[meta_match,]
 
-
-# Set # of GPUs to be used in TensorFlow backend.
-#Sys.setenv(CUDA_VISIBLE_DEVICES="0,3")
-
-# Limit the # of threads to keep the memory footprint low.
 #Sys.setenv(OPENBLAS_NUM_THREADS="16")
 #Sys.setenv(NUMEXPR_NUM_THREADS="16")
 #Sys.setenv(OMP_NUM_THREADS="16")
