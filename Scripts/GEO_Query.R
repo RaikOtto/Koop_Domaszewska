@@ -1,60 +1,63 @@
 library("stringr")
-library("GEOquery")
 
-gse_37250 <- getGEO("GSE37250",GSEMatrix=T) # Kaforou_2013 Illumina HumanHT-12 V4.0 expression beadchip
-
-gse_39939 <- getGEO("GSE39939",GSEMatrix = T) # Anderson     Illumina HumanHT-12 V4.0 expression beadchip
-gse_39940 <- getGEO("GSE39940",GSEMatrix = T) # Anderson     Illumina HumanHT-12 V4.0 expression beadchip
-gse_39941 <- getGEO("GSE39941",GSEMatrix = T) # Anderson     Illumina HumanHT-12 V4.0 expression beadchip
-
-gse_42834 <- getGEO("GSE42834",GSEMatrix=T) # Bloom        Illumina HumanHT-12 V4.0 expression beadchip
-
-gse_19491 <- getGEO("GSE19491",GSEMatrix=T) # Berry Illumina HumanHT-12 V3.0 expression beadchip
-
-gse_34608 <- getGEO("GSE34608",GSEMatrix=T) # Maerzdorf_2012 Agilent-014850 Whole Human Genome Microarray 4x44K G4112F
-gse_28623 <- getGEO("GSE28623",GSEMatrix=T) # Maerzdorf_2011 Agilent-014850 Whole Human Genome Microarray 4x44K G4112F
-gse_73408 <- getGEO("GSE73408",GSEMatrix=T) # Walter [HuGene-1_1-st] Affymetrix Human Gene 1.1 ST Array [transcript (gene) version]
-
+meta_file = read.table("~/Koop_Domaszewska/Misc/Meta_Information.tsv",sep ="\t", header = T)
 
 ###
 
-bam_counts = read.table("~/Koop_Domaszewska/Data/GSE39941_RAW/GSE39939_non-normalized_data.txt",sep ="\t", header = T, row.names = 1)
-colnames(bam_counts) = str_replace(colnames(bam_counts), pattern = "^X", "")
-bam_counts = bam_counts[,seq(1,ncol(bam_counts), by = 2)]
-dim(bam_counts)
-bam_counts[1:5,1:5]
+bam_counts_gse_37250 = read.table("~/Koop_Domaszewska/Data/GSE37250_RAW/GSE37250_non-normalized.txt",sep ="\t", header = T,  fill = T)
+rownames(bam_counts_gse_37250) = bam_counts_gse_37250[,1]
+bam_counts_gse_37250 = bam_counts_gse_37250[, str_detect(colnames(bam_counts_gse_37250),pattern = "AVG_Signal")]
+colnames(bam_counts_gse_37250) = sapply(colnames(bam_counts_gse_37250), FUN = function(vec){return(
+  head(as.character(unlist(str_split(vec, pattern = "_"))),1)
+)})
 
-meta_data = meta_data[match(
-  str_replace( colnames(bam_counts), pattern = "\\.AVG_Signal",""), 
-  meta_data$`barcode:ch1`
-),]
+na_detect = apply(bam_counts_gse_37250, MARGIN = 1, FUN=function(vec){return(sum(is.na(vec))>0)})
+dim(bam_counts_gse_37250)
+bam_counts_gse_37250 = bam_counts_gse_37250[!na_detect,]
+colnames(bam_counts_gse_37250) = read.table("~/Koop_Domaszewska/Data/GSE37250_RAW/Mapping_table.tsv",sep ="\t", header = F, stringsAsFactors = F)[,1]
+bam_counts_gse_37250[1:5,1:5]
 
-#filePaths = getGEOSuppFiles("gse_39941")
+bam_counts_gse_39939 = read.table("~/Koop_Domaszewska/Data/GSE39941_RAW/GSE39939_non-normalized_data.txt",sep ="\t", header = T, fill = T)
+rownames(bam_counts_gse_39939) = bam_counts_gse_39939[,1]
+bam_counts_gse_39939 = bam_counts_gse_39939[, str_detect(colnames(bam_counts_gse_39939),pattern = "AVG_Signal")]
+colnames(bam_counts_gse_39939) = read.table("~/Koop_Domaszewska/Data/GSE39941_RAW//Mapping_Table39.tsv",sep ="\t", header = F, stringsAsFactors = F)[,1]
+bam_counts_gse_39939[1:5,1:5]
 
-meta_data = meta_data[match(
-  str_replace( colnames(bam_counts), pattern = "\\.AVG_Signal",""), 
-  meta_data$`barcode:ch1`
-),]
+bam_counts_gse_39940 = read.table("~/Koop_Domaszewska/Data/GSE39941_RAW/GSE39940_GSE39938_Sample_Probe_Profile_with_no_BG_subtracted_and_not_normalised_GEO_upload_CT_MLW_07_08_12.txt",sep ="\t", header = T, row.names = 1, fill = T)
+bam_counts_gse_39940 = bam_counts_gse_39940[,! str_detect(colnames(bam_counts_gse_39940),pattern = "\\.Pval")]
+colnames(bam_counts_gse_39940) = read.table("~/Koop_Domaszewska/Data/GSE39941_RAW//Mapping_Table40.tsv",sep ="\t", header = F, stringsAsFactors = F)[,1]
+bam_counts_gse_39940[1:5,1:5]
 
-#filePaths = getGEOSuppFiles("GSE37250")
+bam_counts_gse_19491 = read.table("~/Koop_Domaszewska/Data/GSE19491_RAW/Merged.txt",sep ="\t", header = T, row.names = 1, fill = T)
+bam_counts_gse_19491 = bam_counts_gse_19491[,! str_detect(colnames(bam_counts_gse_19491),pattern = "\\.Pval")]
+colnames(bam_counts_gse_19491) = read.table("~/Koop_Domaszewska/Data/GSE19491_RAW//Mapping_table.tsv",sep ="\t", header = F, stringsAsFactors = F)[,1]
+bam_counts_gse_19491[1:5,1:5]
 
-row_var = apply( bam_counts, FUN = var, MARGIN = 1)
-table(row_var <= 1)
-bam_counts = bam_counts[row_var >= 1,]
-dim(bam_counts)
+bam_counts_gse_42834 = read.table("~/Koop_Domaszewska/Data/GSE42834_RAW/Merged.txt",sep ="\t", header = T, row.names = 1, fill = T)
+bam_counts_gse_42834[1:5,1:5]
 
-###
+merged_probes = Reduce( intersect, list(
+  rownames(bam_counts_gse_37250),
+  rownames(bam_counts_gse_39939),
+  rownames(bam_counts_gse_39940),
+  rownames(bam_counts_gse_19491),
+  rownames(bam_counts_gse_42834)
+) )
 
-bam_counts = exprs(gse_39941$GSE39941_series_matrix.txt.gz)
-meta_data = as.data.frame( pData(gse_39941[[1]]) )
+bam_counts_gse_37250 = bam_counts_gse_37250[ rownames(bam_counts_gse_37250) %in% merged_probes, ]
+bam_counts_gse_39939 = bam_counts_gse_39939[ rownames(bam_counts_gse_39939) %in% merged_probes, ]
+bam_counts_gse_39940 = bam_counts_gse_39940[ rownames(bam_counts_gse_39940) %in% merged_probes, ]
+bam_counts_gse_19491 = bam_counts_gse_19491[ rownames(bam_counts_gse_19491) %in% merged_probes, ]
+bam_counts_gse_42834 = bam_counts_gse_42834[ rownames(bam_counts_gse_42834) %in% merged_probes, ]
 
-bam_counts = exprs(gse_37250$GSE37250_series_matrix.txt.gz)
-meta_data = as.data.frame( pData(gse_37250[[1]]) )
-  
-bam_counts = exprs(gse_42834$GSE42834_series_matrix.txt.gz)
-meta_data = as.data.frame( pData(gse_42834[[1]]) )
+new_mat = merged_probes
+new_mat = cbind(new_mat,bam_counts_gse_37250[match(rownames(bam_counts_gse_37250), merged_probes, nomatch = 0),])
+new_mat = cbind(new_mat,bam_counts_gse_39939[match(rownames(bam_counts_gse_39939), merged_probes, nomatch = 0),])
+new_mat = cbind(new_mat,bam_counts_gse_39940[match(rownames(bam_counts_gse_39940), merged_probes, nomatch = 0),])
+new_mat = cbind(new_mat,bam_counts_gse_19491[match(rownames(bam_counts_gse_19491), merged_probes, nomatch = 0),])
+new_mat = cbind(new_mat,bam_counts_gse_42834[match(rownames(bam_counts_gse_42834), merged_probes, nomatch = 0),])
+new_mat = new_mat[,-1]
+new_mat = matrix( as.double(as.character(unlist(new_mat))), ncol = ncol(new_mat), nrow = nrow(new_mat) )
+new_mat[1:5,1:5]
 
-bam_counts = exprs(gse_19491$GSE19491_series_matrix.txt.gz)
-meta_data = as.data.frame( pData(gse_19491[[1]]) )
-
-colnames(bam_counts) = str_replace(colnames(bam_counts), pattern = "^X", "")
+write.table(new_mat, "~/Koop_Domaszewska/Data/Illumina_merged.naked.tsv",sep="\t",quote =F, row.names = F)
