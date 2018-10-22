@@ -1,11 +1,11 @@
-gene_mapping = read.table("~/Koop_Domaszewska/Misc/Gene_mapping_Illumina.tsv", sep ="\t", header = T, stringsAsFactors = F)
+#gene_mapping = read.table("~/Koop_Domaszewska/Misc/Gene_mapping_Illumina.tsv", sep ="\t", header = T, stringsAsFactors = F)
 ### hgnc
 
 ####
 
-expr_raw = new_mat
+hgnc_list = rf_meta$genes$hgnc_symbol[  rf_meta$genes$ensembl_gene_id == rownames(expr_raw)]
+hgnc_list_uni = unique(hgnc_list)
 
-hgnc_list = gene_mapping$hgnc_symbol[ match( merged_probes, gene_mapping$illumina_humanht_12_v4) ]
 expr_raw = expr_raw[ ! is.na(hgnc_list),]
 hgnc_list = hgnc_list[!is.na(hgnc_list)]
 expr_raw = expr_raw[ hgnc_list != "",]
@@ -29,4 +29,4 @@ dim(expr_raw)
 colnames(expr_raw) = str_replace(colnames(expr_raw), pattern = "^X", "" )
 expr_raw[1:5,1:5]
 
-write.table(expr_raw,"~/Koop_Domaszewska/Data/Illumina_merged.HGNC.tsv",sep="\t",quote = F)
+#write.table(expr_raw,"~/Koop_Domaszewska/Data/Illumina_merged.HGNC.tsv",sep="\t",quote = F)

@@ -35,4 +35,6 @@ expr_raw[1:5,1:5]
 ### sva combat
 
 expr_raw = sva::ComBat(expr_raw, batch = meta_data$Study)
-boxplot(expr_raw[,sample(1:ncol(expr), 100)])
+boxplot(expr_raw[,sample(1:ncol(expr_raw), 100)])
+
+write.table( expr_raw,"~/Koop_Domaszewska/Data/Illumina_merged.HGNC.normalized.tsv",sep ="\t",quote = F, row.names = T)

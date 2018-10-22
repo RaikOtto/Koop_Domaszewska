@@ -12,15 +12,15 @@ data = readIllumina(
 
 # init
 
-load("~/Koop_Domaszewska/MDSraw.RDa")
+load("~/Koop_Domaszewska/Data/MDSraw.RDa")
 raw_data = MDSraw$E
+raw_data[1:5,1:5]
 
-### correct for negative values
+# sample wise scaling
 
-neg_val = which(as.double(apply(raw_data, MARGIN = 2, FUN = min)) < 0)
-neg_studies = MDSraw$targets$study[ match( colnames(raw_data[,neg_val]), rownames(MDSraw$targets)) ]
-table( neg_studies )
-meta_match = MDSraw$ which( MDSraw$targets$study %in% c( "Anderson", "bloom") )
+scale_mat = apply(raw_data, MARGIN = 2, FUN = function(vec){return(scale(vec))})
+rownames(scale_mat) = rownames(raw_data)
+scale_mat[1:5,1:5]
 
 ###
 
