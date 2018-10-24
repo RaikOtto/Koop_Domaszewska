@@ -2,8 +2,11 @@
 ### hgnc
 
 ####
+load("~/Koop_Domaszewska/Data/MDS.RDa")
 
-hgnc_list = rf_meta$genes$hgnc_symbol[  rf_meta$genes$ensembl_gene_id == rownames(expr_raw)]
+selection_mat = trainingMDS$genes
+rownames(selection_mat) = selection_mat$ensembl_gene_id
+hgnc_list = selection_mat[ rownames(expr_raw), "hgnc_symbol"]
 hgnc_list_uni = unique(hgnc_list)
 
 expr_raw = expr_raw[ ! is.na(hgnc_list),]
