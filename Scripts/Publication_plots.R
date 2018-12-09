@@ -7,13 +7,13 @@ draw_colnames_45 <- function (coln, gaps, ...) {
   return(res)}
 assignInNamespace(x="draw_colnames", value="draw_colnames_45",ns=asNamespace("pheatmap"))
 
-load("~/Koop_Domaszewska/Data/trainingMDS.RDa")
+load("~/Koop_Domaszewska/Data/TBprofiles/trainingMDS.RDa")
 expr_raw = trainingMDS$E
 colnames(expr_raw) = str_replace(colnames(expr_raw), pattern = "^X", "")
 source("~/Koop_Domaszewska/Scripts/Variance_selection.R")
 
 dim(expr_raw)
-expr_raw = expr_raw[,sample(size = 300, x = 1:ncol(expr_raw))]
+expr_raw = expr_raw[,sample(size = 1000, x = 1:ncol(expr_raw))]
 expr_raw[1:5,1:5]
 
 ### Prep
@@ -45,14 +45,13 @@ aka3 = list(
       TB = "red"
   ),
   IFN_I = c(
-    low = "green",
-    medium = "yellow",
-    high = "red"
+    IFN_I = "red",
+    noIFN_I = "white"
   )
 )
 ###
 
-load("~/Koop_Domaszewska/Data/myIFN_I_set.RDa")
+load("~/Koop_Domaszewska/Data/TBprofiles/IFN_I_set.RDa")
 sad_genes = as.character(unlist(myIFN_I_set$MODULES2GENES[1]))
 sad_genes = sad_genes[ sad_genes != ""]
 expr = expr_raw[ rownames(expr_raw) %in% sad_genes,]
@@ -98,8 +97,9 @@ p
 library("umap")
 
 ### umap
-
-sad_genes = as.character(unlist(myIFN_I_set$MODULES2GENES[5]))
+expr_raw = expr_raw[,sample(size = 1000, x = 1:ncol(expr_raw))]
+index = 4
+sad_genes = as.character(unlist(myIFN_I_set$MODULES2GENES[index]))
 sad_genes = sad_genes[ sad_genes != ""]
 expr = expr_raw[ rownames(expr_raw) %in% sad_genes,]
 
@@ -113,7 +113,8 @@ p = ggplot2::qplot(
     color = meta_data[colnames(expr),"activeTB"],
     geom=c("point", "smooth"),
     xlab = "Umap dim 1",
-    ylab = "Umap dim 2"
+    ylab = "Umap dim 2"#,
+    #shape = meta_data[colnames(expr),"IFN_I"]
 ) + guides(color=guide_legend(title="Active TB"), position = "top")
 p
-
+names(myIFN_I_set$MODULES2GENES)[index]
